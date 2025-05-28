@@ -14,21 +14,10 @@ typedef struct s_client {
 t_client *clients[FD_SETSIZE];
 int max_fd = 0, next_id = 0;
 
-void fatal(int sockfd) {
-    write(2, "Fatal error\n", strlen("Fatal error\n"));
-    if (sockfd != -1)
-        close(sockfd);
-    for (int i = 0; i <= max_fd; ++i) {
-        if (clients[i]) {
-            close(i);
-            free(clients[i]);
-            clients[i] = NULL;
-        }
-    }
-    exit(1);
-}
 
-void cleanup(int sockfd) {
+void cleanup(int sockfd, int fatal) {
+	if (fatal == 1)
+	    write(2, "Fatal error\n", strlen("Fatal error\n"));
     if (sockfd != -1)
         close(sockfd);
     for (int i = 0; i <= max_fd; ++i) {
@@ -38,7 +27,7 @@ void cleanup(int sockfd) {
             clients[i] = NULL;
         }
     }
-}
+}//ok
 
 void broadcast(int sender_fd, char *msg) {
     for (int i = 0; i <= max_fd; ++i) {
@@ -50,7 +39,7 @@ void broadcast(int sender_fd, char *msg) {
             }
         }
     }
-}
+}//OK
 
 int main(int argc, char **argv) {
     int sockfd = -1, connfd, port, r;
@@ -66,7 +55,7 @@ int main(int argc, char **argv) {
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
-        fatal(sockfd);
+        cleanup(sockfd, 1);
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
@@ -74,9 +63,9 @@ int main(int argc, char **argv) {
     servaddr.sin_port = htons(port);
 
     if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
-        fatal(sockfd);
+        cleanup(sockfd, 1);
     if (listen(sockfd, 10) < 0)
-        fatal(sockfd);
+        cleanup(sockfd, 1);
 
     FD_ZERO(&active);
     FD_SET(sockfd, &active);
@@ -96,7 +85,7 @@ int main(int argc, char **argv) {
                         continue;
                     clients[connfd] = (t_client *)calloc(1, sizeof(t_client));
                     if (!clients[connfd])
-                        fatal(sockfd);
+                        cleanup(sockfd, 1);
                     clients[connfd]->id = next_id++;
                     FD_SET(connfd, &active);
                     if (connfd > max_fd)
@@ -139,6 +128,19 @@ int main(int argc, char **argv) {
         }
     }
 
-    cleanup(sockfd);
+    cleanup(sockfd, 0);
     return 0;
 }
+
+/*
+| Variabile  | Tipo                 | Descrizione                                                         |
+| ---------- | -------------------- | ------------------------------------------------------------------- |
+| `sockfd`   | `int`                | Socket principale del server (usato per `bind`, `listen`, `accept`) |
+| `connfd`   | `int`                | Socket creato da `accept()` per ogni nuovo client                   |
+| `port`     | `int`                | Porta del server (ottenuta da `argv[1]`)                            |
+| `r`        | `int`                | Valore di ritorno di `recv()` (lunghezza dei dati ricevuti)         |
+| `servaddr` | `struct sockaddr_in` | Indirizzo e porta del server per il `bind()`                        |
+| `cliaddr`  | `struct sockaddr_in` | Indirizzo del client connesso (da `accept()`)                       |
+| `active`   | `fd_set`             | Set di file descriptor attivi, gestito da `select()`                |
+| `read_fds` | `fd_set`             | Copia temporanea di `active`, usata a ogni ciclo `select()`         |
+*/
