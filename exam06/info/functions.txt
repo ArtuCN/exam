@@ -1,0 +1,44 @@
+write(int fd, const void *buf, size_t count):	Scrive fino a count byte da buf nel file/   socket identificato da fd. Restituisce il numero di byte scritti.👌
+
+close(int fd):	Chiude il file descriptor fd. Usato per chiudere socket.👌
+
+select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout):	Attende che uno o più file descriptor diventino pronti per I/O. Fondamentale per gestire più client contemporaneamente.
+
+socket(int domain, int type, int protocol):	Crea un socket. Tipicamente: socket(AF_INET, SOCK_STREAM, 0).
+
+accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen):	Accetta una nuova connessione sul socket sockfd. Restituisce un nuovo socket per comunicare col client.
+
+listen(int sockfd, int backlog):	Mette il socket in modalità ascolto. backlog è la lunghezza della coda delle connessioni pendenti.
+
+send(int sockfd, const void *buf, size_t len, int flags):	Invia dati su un socket. Simile a write(), ma con flag per controlli extra.
+
+recv(int sockfd, void *buf, size_t len, int flags):	Riceve dati da un socket. Simile a read(). Restituisce il numero di byte letti.
+
+bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen):	Associa un socket a un indirizzo IP e una porta. Necessario prima di 
+listen().
+
+strstr(const char *haystack, const char *needle):	Cerca la sottostringa needle dentro haystack. Restituisce un puntatore alla prima occorrenza. Utile per identificare comandi o delimitatori.
+
+strlen(const char *s):	Restituisce la lunghezza della stringa s (escludendo \0).👌
+
+strcpy(char *dest, const char *src):	Copia la stringa src in dest. Attenzione: dest deve avere spazio sufficiente.👌
+
+strcat(char *dest, const char *src):	Concatena la stringa src alla fine di dest. Attenzione alla gestione della memoria.👌
+
+malloc(size_t size):	Alloca size byte di memoria non inizializzata.👌
+
+calloc(size_t nmemb, size_t size):	Alloca memoria per un array di nmemb elementi e li inizializza a zero.👌
+
+realloc(void *ptr, size_t size):	Cambia la dimensione del blocco di memoria puntato da ptr a size. Può spostare il blocco in un’altra posizione.👌
+
+free(void *ptr):	Libera la memoria allocata precedentemente con malloc, calloc o realloc.👌
+
+bzero(void *s, size_t n):	Imposta i primi n byte dell’area di memoria puntata da s a zero. (Equivalente a memset(s, 0, n))👌
+
+memset(void *s, int c, size_t n):	Imposta i primi n byte di s al valore c. Utile per azzerare strutture.👌
+
+atoi(const char *nptr):	Converte una stringa in intero (int). Utile per ottenere la porta da argv[1].👌
+
+sprintf(char *str, const char *format, ...):	Scrive una stringa formattata in str (come printf, ma scrive in una stringa). Attenzione: può causare overflow se non gestita bene.👌
+
+exit(int status):	Termina il programma con codice di uscita status. Tipicamente si usa exit(1) per errore, exit(0) per successo.👌
