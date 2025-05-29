@@ -21,7 +21,8 @@ void cleanup(int sockfd, int fatal) {
     if (sockfd != -1)
         close(sockfd);
     for (int i = 0; i <= max_fd; ++i) {
-        if (clients[i]) {
+        if (clients[i])
+        {
             close(i);
             free(clients[i]);
             clients[i] = NULL;
@@ -71,14 +72,17 @@ int main(int argc, char **argv) {
     FD_SET(sockfd, &active);
     max_fd = sockfd;
 
-    while (1) {
+    while (1) 
+    {
         read_fds = active;
         if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) < 0)
             continue;
 
         for (int fd = 0; fd <= max_fd; ++fd) {
-            if (FD_ISSET(fd, &read_fds)) {
-                if (fd == sockfd) {
+            if (FD_ISSET(fd, &read_fds)) 
+            {
+                if (fd == sockfd) 
+                {
                     socklen_t len = sizeof(cliaddr);
                     connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &len);
                     if (connfd < 0)
@@ -94,28 +98,36 @@ int main(int argc, char **argv) {
                     char msg[64];
                     sprintf(msg, "server: client %d just arrived\n", clients[connfd]->id);
                     broadcast(connfd, msg);
-                } else {
-                    char buf[4096], msg[8192];
+                } 
+                else 
+                {
+                    char buf[4096], msg[100000];
                     r = recv(fd, buf, sizeof(buf) - 1, 0);
-                    if (r <= 0) {
-                        char left_msg[64];
+                    if (r <= 0)
+                    {
+                        char left_msg[100];
                         sprintf(left_msg, "server: client %d just left\n", clients[fd]->id);
                         broadcast(fd, left_msg);
                         close(fd);
                         free(clients[fd]);
                         clients[fd] = NULL;
                         FD_CLR(fd, &active);
-                    } else {
+                    }
+                    else
+                    {
                         buf[r] = '\0';
                         int i = 0;
-                        while (i < r) {
-                            char line[4096];
+                        while (i < r) 
+                        {
+                            char line[5000];
                             int line_len = 0;
 
-                            while (i < r && buf[i] != '\n') {
+                            while (i < r && buf[i] != '\n') 
+                            {
                                 line[line_len++] = buf[i++];
                             }
-                            if (i < r && buf[i] == '\n') {
+                            if (i < r && buf[i] == '\n') 
+                            {
                                 i++;
                             }
                             line[line_len] = '\0';
