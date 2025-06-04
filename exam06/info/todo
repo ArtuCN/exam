@@ -1,0 +1,147 @@
+copy libraries
+add <stdlib.h>  <stdio.h>
+
+
+
+copy int extract_message(char **buf, char **msg)
+copy char *str_join(char *buf, char *add)
+
+All of global variables (9)
+
+int		count = 0, max_fd = 0;
+int		ids[65536];
+char	*msgs[65536];
+
+fd_set	rfds, wfds, afds;
+char	buf_read[1001], buf_write[42];
+
+
+all of functions (6 + 2)
+
+void fatal_error()
+void register_client(int fd)
+void remove_client(int fd)
+void send_message(int fd)
+int create_socket()
+void	notify_other(int author, char *str)
+
+
+FATAL_ERROR:
+
+
+write what you have to write in stderr and exit with status 1
+
+NOTIFY_OTHER:
+you cicle all the fd and if the fd is ready to listen (use FD_ISSET(fd, &wfds))and fd is different then author
+you use send() to send to the selected fd the str, of size strlen(str), with flag 0
+
+remember send accept 4 paramaters and you will be okay
+
+
+REGISTER_CLIENT:
+
+change the value of max_fd if you have to add adn fd, and ou set ids[fd] to count (and increase count of course)
+msgs[fd] to null
+
+and use FD_SET(fd, &afds)
+
+
+then write to all the clients by using sprintf that the client is arrived
+
+call notify other to send to the other clients
+
+
+REMOVE_CLIENT:
+
+use sprintf to write to all clients that ids[fd] has left and notify
+
+free (msgs[fd]) for liberate memory of not sended messages then clear with FD_CLR(fd, &afds) and close(fd)
+close fd!
+
+SEND_MSG:
+this is the wunction that sends the messages obviusly so you have to create char *msg
+
+then with a while(exctract_message(&(msgs[fd]), &msg))
+this cicle exctract all the message from msgs and put it in msg
+by using sprintf you write it and then notify others
+(you have to call the function twice one with the buf_write and one with the msg)
+obviusly then free the msg
+
+
+CREATE_SOCKET:
+max_fd = socket(AF_INET, SOCK_STREAM, 0);
+here you create the socket by using ipv4 and tpc
+if it is better to remember you can write socket(2, 1, 0) it is the same ;)
+
+check for error (max_fd < 0)
+
+and use FD_SET(max_fd, &afds) to add max_fd to afds
+
+return the max fd 
+
+
+now the main() :)
+
+
+obviusly use int ac, char **av
+
+and check arguments, then by using FD_ZERO you clean afds
+
+and create the server socke with your create_socket function
+
+
+create a sockaddr_in and fill it with zero
+
+initialize his sin_family sin_addr.s_addr
+and sin_port with 
+
+servaddr.sin_family = AF_INET;
+servaddr.sin_addr.s_addr = htonl(2130706433);
+servaddr.sin_port = htons(atoi(av[1]));
+
+
+
+do the bind and listen
+
+in case of error use fatal error
+
+now here starts the main cicle
+
+
+rdfs e wfds became = afds
+
+
+by using select you check which fd is ready to write and wich is ready to rea
+
+(number of fd, where to put read fds, where to put write fds, null. null)
+< 0 ERROR
+
+
+
+
+you have 3 if now
+
+the first is to skip not ready fds with FD_ISSET(fd, &rfds)
+
+the second and the third  are an if and else 
+
+if (fd == sockfd) is when there are ew connection
+
+create a socklen_t that is equal the sizeof servaddr
+
+then accept (sockfd, (struct sockadr *)&servaddr, &addr_len)
+
+if return is >= 0 no error occured so you can register it!
+
+
+else:
+
+this is where we are listening fo  messages and quitting clients
+
+use recv(fd, buf_read, 1000, 0)
+
+if return is  <= it means client has quitted
+so call remove_clients(fd) and break
+
+if not put '\0' to the end of buf read, msgs[fd] = is equal to strjoin msgs[fd], buf read
+and then send_msg(fd)
